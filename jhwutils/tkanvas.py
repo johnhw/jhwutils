@@ -1,11 +1,51 @@
-from tkinter import *
+# py 2.x compatibility
+try: 
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
+
 import numpy as np
 import scipy.linalg, scipy.stats
 
+def clamp(val, minimum=0, maximum=255):
+    if val < minimum:
+        return minimum
+    if val > maximum:
+        return maximum
+    return val
+
+def colorscale(hexstr, scalefactor):
+    """
+    Scales a hex string by ``scalefactor``. Returns scaled hex string.
+
+    To darken the color, use a float value between 0 and 1.
+    To brighten the color, use a float value greater than 1.
+
+    >>> colorscale("#DF3C3C", .5)
+    #6F1E1E
+    >>> colorscale("#52D24F", 1.6)
+    #83FF7E
+    >>> colorscale("#4F75D2", 1)
+    #4F75D2
+    """
+
+    hexstr = hexstr.strip('#')
+
+    if scalefactor < 0 or len(hexstr) != 6:
+        return hexstr
+
+    r, g, b = int(hexstr[:2], 16), int(hexstr[2:4], 16), int(hexstr[4:], 16)
+
+    r = clamp(r * scalefactor)
+    g = clamp(g * scalefactor)
+    b = clamp(b * scalefactor)
+
+    return "#%02x%02x%02x" % (r, g, b)
+
 class TKanvas(object):
-    def __init__(self, draw_fn=None, tick_fn=None, event_fn=None, quit_fn=None, w=400, h=400, frame_time=20):
+    def __init__(self, draw_fn=None, tick_fn=None, event_fn=None, quit_fn=None, w=400, h=400, frame_time=20, bgcolor='black'):
         self.root = Tk()
-        self.canvas = Canvas(self.root, background = "black", width=w, height=h)
+        self.canvas = Canvas(self.root, background = bgcolor, width=w, height=h)
         self.w, self.h = w, h
         self.cx = w/2
         self.cy=h/2
@@ -29,8 +69,7 @@ class TKanvas(object):
         self.root.bind( "<Any-Motion>", lambda ev: self.event("mousemotion", ev))        
         self.frame_time = frame_time
         self.root.update()
-        self.root.after(int(10), self.update)
-        
+        self.root.after(int(10), self.update)        
        
     def quit(self, event):
         print("Exiting...")
@@ -45,6 +84,12 @@ class TKanvas(object):
     def clear(self):
         self.canvas.delete(ALL)
         
+    def to_front(self, obj):
+        self.canvas.tag_raise(obj)
+     
+    def to_back(self, obj):
+        self.canvas.tag_lower(obj)
+        
     def rectangle(self, x1, y1, x2, y2, **kw):
         return self.canvas.create_rectangle( x1, y1, x2, y2, **kw)        
     
@@ -56,6 +101,7 @@ class TKanvas(object):
         self.canvas.create_polygon(*q.ravel(), **kw)
         
     def polygon(self, pts, **kw):
+        pts = np.array(pts)
         return self.canvas.create_polygon(*pts.ravel(), **kw)    
         
     def modify(self, item, **kw):
@@ -86,6 +132,9 @@ class TKanvas(object):
     def delete(self, tagOrId):
         self.canvas.delete(tagOrId)
         
+    def title(self, title):
+        self.root.wm_title(title)
+
     def event(self, event_type, event):        
         if event_type=="mousemotion":
             # track mouse offset
@@ -100,10 +149,11 @@ class TKanvas(object):
         if self.event_fn is not None:
             self.event_fn(self, event_type, event)    
     
-    def normal(self, mean, cov, ppfs=(0.65, 0.75, 0.85), **kw):
+    def normal(self, mean, cov, outline='#0000ff', ppfs=(0.55, 0.65, 0.75, 0.85, 0.9), **kw):
         for ppf in reversed(sorted(ppfs)):
             scale = scipy.stats.norm.ppf(ppf)
-            self.error_ellipse(mean, cov, scale=scale, smooth=True, fill='', **kw)        
+            cscale = 2.0*scipy.stats.norm.pdf(scale)
+            self.error_ellipse(mean, cov, scale=scale, smooth=True, outline=colorscale(outline,cscale), fill=colorscale(outline,cscale), **kw)        
         
     def update(self):
         if self.draw_fn is not None:            
@@ -123,14 +173,15 @@ if __name__=="__main__":
         src.clear()    
         src.line(0, src.mouse_y, src.w, src.mouse_y, fill="red")        
         src.line(src.mouse_x, 0, src.mouse_x, src.h, fill="red")        
-        src.normal(np.array([src.mouse_x, src.mouse_y]), np.eye(2)*30,
-                   smooth=1, outline="blue", fill='')
+        #src.normal(np.array([src.mouse_x, src.mouse_y]), np.eye(2)*30,
+        #           smooth=1, outline="blue", fill='')
 
         
         
         pass
-        
+    
     c = TKanvas(draw_fn=draw)        
+    mainloop()
 
 
     

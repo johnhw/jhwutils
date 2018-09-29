@@ -1,6 +1,6 @@
 import random
 from IPython.display import HTML
-import tkanvasold as tkanvas
+import jhwutils.tkanvas as tkanvas
 
 
 class Lander(object):
@@ -148,10 +148,7 @@ def simulate(fn):
     
     lander = Lander(fn)    
     c = tkanvas.TKanvas(draw_fn = lander.draw, tick_fn=lander.update)
-    #c.root.mainloop()
-    #while msg is None:
-    #    msg = lander.update(0)
-    
+    c.root.mainloop()
     return lander
     
 
@@ -161,5 +158,9 @@ def test_fn(x,y):
     
 if __name__=="__main__":
     simulate(test_fn)
+    
+    #while msg is None:
+    #    msg = lander.update(0)
+    
     
     
