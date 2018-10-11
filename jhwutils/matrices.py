@@ -145,7 +145,7 @@ def show_boxed_tensor_latex(x, box_rows=True):
 
 
 def show_matrix_effect(m, suptitle=""):
-
+    print_matrix("A_{\\text{%s}}"%suptitle, m)
     def piped(ax, pts):
         f = 1.08
         a, b, c, d = (pts[:, 0] * f, pts[:, 9] * f, pts[:, 90] * f,
