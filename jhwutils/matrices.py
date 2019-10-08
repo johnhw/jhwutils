@@ -6,11 +6,16 @@ except:
 
 import IPython.display     
 def print_matrix(name, matrix, prec=2):
-    matrix = np.around(matrix, prec)
+
+        
     # print scalars
     if not hasattr(matrix, "__len__"):
         IPython.display.display(IPython.display.Latex("${0} = {1}$".format(name, matrix)))
         return
+
+    if str(matrix.dtype).startswith('float'):
+        matrix = np.around(matrix, prec)
+    
 
     if len(matrix.shape)==1:
         matrix = matrix[None,:]
