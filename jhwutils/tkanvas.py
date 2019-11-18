@@ -36,7 +36,7 @@ def loop_tk(kernel):
     kernel.timer.start()
 
 
-# @loop_tk.exit
+@loop_tk.exit
 def loop_tk_exit(kernel):
     kernel.app.destroy()
 
