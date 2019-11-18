@@ -6,6 +6,7 @@ def array_hash(arr):
     arr = np.array(arr)
     shape = arr.shape
     flat = arr.ravel()
+
     stats = (
         np.nanmax(flat),
         np.nanmin(flat),
@@ -21,6 +22,7 @@ def array_hash(arr):
 def check_hash(arr, test):
     sh, stats = array_hash(arr)
     ok = sh == test[0] and np.allclose(stats, test[1], rtol=1e-5, atol=1e-5)
+
     if not ok:
         print(f"Got hash {sh}, {stats} but expected {test[0]}, {test[1]}")
     return ok
