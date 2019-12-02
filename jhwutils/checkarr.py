@@ -50,14 +50,16 @@ def check_hash(arr, test):
         print(f"Got hash {sh}, {stats} but expected {test[0]}, {test[1]}")
     return ok
 
+
 def check_moment(arr, hash):
     hash = moment_hash(arr)
     print(hash)
-    return hash==moment_hash
+    return hash == moment_hash
+
 
 def _check_scalar(x, tol=5):
     formatting = f"{{x:1.{tol}e}}"
-    formatted = formatting.format(x=x)    
+    formatted = formatting.format(x=x)
     hash_f = hex(crc32(formatted.encode("ascii")))
     return hash_f
 
@@ -76,7 +78,7 @@ def check_scalar(x, h, tol=5):
 def check_string(s, h):
     hash_f = hex(crc32(f"{s.lower()}".encode("utf8")))
     if hash_f != h:
-        print(f"Warning: Got {x} -> {hash_f}, expected {h}")
+        print(f"Warning: Got {s} -> {hash_f}, expected {h}")
     return hash_f == h
 
 

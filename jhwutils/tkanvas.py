@@ -36,9 +36,17 @@ def loop_tk(kernel):
     kernel.timer.start()
 
 
-@loop_tk.exit
-def loop_tk_exit(kernel):
-    kernel.app.destroy()
+try:
+
+    @loop_tk.exit
+    def loop_tk_exit(kernel):
+        kernel.app.destroy()
+
+
+except:
+
+    def loop_tk_exit(kernel):
+        pass
 
 
 def clamp(val, minimum=0, maximum=255):
