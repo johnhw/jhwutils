@@ -12,7 +12,7 @@ def eigsorted(cov):
 def cov_ellipse(ax, x, nstd, **kwargs):
     cov = np.cov(x.T)
     mu = np.mean(x, axis=0)
-    _cov_ellipse(mu, sigma, nstd=nstd, **kwargs)
+    _cov_ellipse(ax, mu, cov, nstd=nstd, **kwargs)
 
 
 def _cov_ellipse(ax, mu, sigma, nstd=1, **kwargs):
