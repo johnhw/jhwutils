@@ -207,4 +207,4 @@ def show_matrix_effect(m, suptitle=""):
     rax.set_xlim(-1.5, 1.5)
     lax.set_ylim(-1.5, 1.5)
     rax.set_ylim(-1.5, 1.5)        
-    plt.suptitle(suptitle)
+    plt.suptitle(f"${suptitle}$" if suptitle != "" else "")
