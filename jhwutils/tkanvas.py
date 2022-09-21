@@ -7,7 +7,7 @@ except ImportError:
 import numpy as np
 import scipy.linalg, scipy.stats
 
-from IPython.kernel.zmq.eventloops import register_integration
+from ipykernel.eventloops import register_integration
 
 
 @register_integration("xtk")
@@ -41,7 +41,6 @@ try:
     @loop_tk.exit
     def loop_tk_exit(kernel):
         kernel.app.destroy()
-
 
 except:
 
@@ -245,4 +244,3 @@ if __name__ == "__main__":
 
     c = TKanvas(draw_fn=draw)
     mainloop()
-

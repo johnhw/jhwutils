@@ -39,7 +39,9 @@ def load_image_colour(fname):
 
 
 def load_image_gray(fname):
-    img = skimage.color.rgb2gray(skimage.io.imread(fname, plugin="pil"))
+    img = skimage.io.imread(fname, plugin="pil")
+    if img.shape[-1] == 3 or img.shape[-1] == 4:
+        img = skimage.color.rgb2gray(img)
     return img.astype(np.float64)
 
 
@@ -90,7 +92,7 @@ def plot_sound(audio):
 
 
 def load_obj(filename, swapyz=False):
-    """Loads a Wavefront OBJ file. """
+    """Loads a Wavefront OBJ file."""
     vertices = []
     normals = []
     texcoords = []
