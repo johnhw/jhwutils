@@ -1,6 +1,9 @@
 import numpy as np
 from IPython.display import HTML, display
 
+
+
+
 def bitstring_array(x):
     # force to big endian for printing
     endianed = x.dtype.newbyteorder('B')    
@@ -140,13 +143,100 @@ def print_binary_float_html(fl, word, exp, mantissa):
             
         
         display(HTML(html))
+
+
+def print_binary_float_rich(fl, word, exp, mantissa):
+        from rich.console import Console 
+        from rich.table import Table
+        c = Console() 
+
+        mantissa -= 1
+        bias = (2**(exp-1))-1
+        total_width = exp + mantissa + 1 # for sign
         
+        sep_word = intersperse(word, [1,exp,mantissa], ['</td> <td>','</td> <td>','</td> <td>'])
+        bar_word = intersperse(word, [1,exp,mantissa], ['|','|','|'])[:-1]
+        sign, e, m = int(word[0:1],2), int(word[1:1+exp],2)-bias, int(word[1+exp:total_width],2)        
+        infinite = e==2**(exp-1)
+        nan = infinite and m!=0
+        sign = -1 if sign==1 else 1
+        
+        zero = fl==0.0
+        denormal = (e+bias)==0 and not zero
+        if exp==8:
+            dtype="float32"
+        else:
+            dtype="float64"
+
+        table = Table(f"{fl}")
+
+        details = Table(show_header=False)
+        details.add_column()
+        details.add_column() 
+
+        details.add_row("dtype", f"{dtype}")
+        details.add_row("Flags", f"{'[yellow]denormal[/yellow]' if denormal else ''} {'[red]infinite[/red]' if infinite and not nan else ''} {'[blue]NaN[/blue]' if infinite and nan else ''} {'[cyan]zero[/cyan]' if zero else ''} {'[green]-ve[/green]' if sign==-1 else ''}")
+        details.add_row("Float", f"{fl:.40f}")
+        details.add_row("Sci.", f"{fl:.40e}")
+
+        table.add_row(details)
+        split = Table()
+        split.add_column("")
+        split.add_column("sign", style="red")
+        split.add_column("exponent", style="yellow")
+        split.add_column("mantissa", style="blue") 
+        
+        sign_name = f"{sign}"
+
+        if infinite:
+            if mantissa==0:
+                mantissa_name = "infinity"
+            else:
+                mantissa_name = "NaN"
+            exponent_name = "inf/NaN"     
+        elif zero:
+            mantissa_name = "0.0"
+            exponent_name = "0.0"
+        elif not denormal:
+            mantissa_name = f"{1.0+m/(2.0**mantissa):.40f}"
+            exponent_name = f"2**{e}"       
+        else:
+            # denormal case
+            mantissa_name = f"{m/(2.0**(mantissa-1)):.40f}"
+            exponent_name = f"2**{e}"
+            
+                
+        split.add_row("Binary", word[0], word[1:exp+1], word[1+exp+1:-1])
+        split.add_row("Integer", f"{sign}", f"{e-bias}", f"{m}")
+        split.add_row("Integer (w/bias)", f"{sign}", f"{e}", f"{m}")
+        split.add_row("Float", sign_name, exponent_name, mantissa_name)
+
+           
+        table.add_row(split)
+
+        table.add_row(f"[red]{sign_name}[/red] * [yellow]{exponent_name}[/yellow] * [blue]{mantissa_name}[/blue] = {fl}")
+        
+        c.print(table)
+        return 
 
 def print_float(fl, dtype=np.float64):
-    print_binary_float(fl, bitstring_array(np.array(fl, dtype=dtype)), 11, 53)
+    if dtype==np.float64:
+        print_binary_float(fl, bitstring_array(np.array(fl, dtype=dtype)), 11, 53)    
+    elif dtype==np.float32:
+        print_binary_float(fl, bitstring_array(np.array(fl, dtype=dtype)), 8, 23)    
 
 def print_float_html(fl, dtype=np.float64):
-    print_binary_float_html(fl, bitstring_array(np.array(fl, dtype=dtype)), 11, 53)    
+    if dtype==np.float64:
+        print_binary_float_html(fl, bitstring_array(np.array(fl, dtype=dtype)), 11, 53)    
+    elif dtype==np.float32:
+        print_binary_float_html(fl, bitstring_array(np.array(fl, dtype=dtype)), 8, 23)    
+
+def print_float_rich(fl, dtype=np.float64):
+    if dtype==np.float64:
+        print_binary_float_rich(fl, bitstring_array(np.array(fl, dtype=dtype)), 11, 53)    
+    elif dtype==np.float32:
+        print_binary_float_rich(fl, bitstring_array(np.array(fl, dtype=dtype)), 8, 23)    
+
 
 def print_float_structure(x):
     flat = x.ravel()
