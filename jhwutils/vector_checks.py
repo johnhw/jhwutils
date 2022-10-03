@@ -3,6 +3,7 @@ from textwrap import dedent
 ## From https://stackoverflow.com/questions/36662181/is-there-a-way-to-check-if-function-is-recursive-in-python
 from bdb import Bdb
 import sys
+import numpy as np
 
 class RecursionDetected(Exception):
     pass
@@ -69,6 +70,9 @@ def check_is_vectorised(f, vec_f, *args, **kwargs):
         return False
     expected = f(*args, **kwargs)
     actual = vec_f(*args, **kwargs)
+
+    
+
     if not np.allclose(expected, actual):
         print("Values don't match")
         return False
@@ -76,6 +80,7 @@ def check_is_vectorised(f, vec_f, *args, **kwargs):
         
 if __name__=="__main__":
     import numpy as np
+
     def f(x):
         a = []
         for i in range(x):
@@ -96,6 +101,7 @@ if __name__=="__main__":
 
     def lc_f(x):
         return np.array([i*x for i in range(x)])
+
     def vec_f(x):
         return np.arange(x)*x
 
@@ -103,5 +109,5 @@ if __name__=="__main__":
     assert not check_is_vectorised(f, f, 10) # for
     assert not check_is_vectorised(f, while_f, 10) # for
     assert not check_is_vectorised(f, lc_f, 10) # for
-    
+
 
