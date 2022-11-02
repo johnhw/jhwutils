@@ -42,6 +42,13 @@ def test_recursion(func):
         sys.settrace(None)
 
 
+def check_ast(fn, forbidden_nodes):
+    tree = ast.parse(dedent(inspect.getsource(fn)))
+    for node in ast.walk(tree):
+        if type(node) in forbidden_nodes:
+            return False
+    return True
+
 def check_vectorised(fn):
     tree = ast.parse(dedent(inspect.getsource(fn)))
     for node in ast.walk(tree):
