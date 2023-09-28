@@ -11,6 +11,7 @@ except ImportError:
     from io import BytesIO as StringIO
 import IPython.display
 import numpy as np
+from PIL import Image, ImageSequence
 
 
 def show_gif(a, width="100%", duration=10):
@@ -34,8 +35,17 @@ def show_image(a, fmt="png", width="100%"):
 
 
 def load_image_colour(fname):
-    img = skimage.io.imread(fname, plugin="pil")
+    img = skimage.io.imread(fname, plugin="imageio")
     return img.astype(np.float64) / 255.0
+
+def load_gif(fname):
+    frames = []
+    with Image.open(fname) as im:
+       for frame in ImageSequence.Iterator(im):
+        frame = np.array(frame)
+        if len(frame.shape)==3:
+            frames.append(frame) 
+    return np.array(frames).astype(np.float64) / 255.0
 
 
 def load_image_gray(fname):
