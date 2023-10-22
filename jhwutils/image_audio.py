@@ -13,6 +13,13 @@ import IPython.display
 import numpy as np
 from PIL import Image, ImageSequence
 
+import os
+
+def retain_img(fname):
+    os.makedirs("generated", exist_ok=True)
+    plt.savefig("generated/" + fname, bbox_inches="tight", pad_inches=0, dpi=200)
+
+
 
 def show_gif(a, width="100%", duration=10):
     a = np.uint8(np.clip(a, 0, 1) * 255.0)

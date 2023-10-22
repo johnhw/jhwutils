@@ -3,6 +3,7 @@ import sys
 from IPython.display import display, HTML
 import inspect
 import timeit
+import binascii 
 
 def case_crc(s):
     h_crc = binascii.crc32(bytes(s.lower(), "ascii"))

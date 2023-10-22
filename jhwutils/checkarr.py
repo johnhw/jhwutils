@@ -42,27 +42,31 @@ def moment_hash(arr):
     return shape_hash[2:] + _check_scalar(np.nansum(stats))[2:]
 
 
-def check_hash(arr, test):
-    sh, stats = array_hash(arr)
+def strict_array_hash(arr):
+    ix = np.meshgrid(*[np.arange(i) for i in arr.shape], indexing="ij")
+    return array_hash(np.mean([i*arr for i in ix], axis=0))
+
+def check_hash(arr, test, strict=False):
+    if strict:
+        sh, stats = strict_array_hash(arr)
+    else:
+        sh, stats = array_hash(arr)
     ok = sh == test[0] and np.allclose(stats, test[1], rtol=1e-5, atol=1e-5)
 
     if not ok:
         print(f"Got hash {sh}, {stats} but expected {test[0]}, {test[1]}")
     return ok
 
-
 def check_moment(arr, hash):
     hash = moment_hash(arr)
     print(hash)
     return hash == moment_hash
-
 
 def _check_scalar(x, tol=5):
     formatting = f"{{x:1.{tol}e}}"
     formatted = formatting.format(x=x)
     hash_f = hex(crc32(formatted.encode("ascii")))
     return hash_f
-
 
 def check_scalar(x, h, tol=5):
     offset = 10 ** (-tol) * x * 0.1
@@ -74,13 +78,17 @@ def check_scalar(x, h, tol=5):
         return False
     return True
 
-
 def check_string(s, h):
     hash_f = hex(crc32(f"{s.lower()}".encode("utf8")))
     if hash_f != h:
         print(f"Warning: Got {s} -> {hash_f}, expected {h}")
     return hash_f == h
 
+def check_anagram(l):
+    return check_string("".join(sorted(l)))
+
+def check_list(l):
+    return check_string("".join(l))
 
 if __name__ == "__main__":
     check_scalar(0.01000, "0x5ecf2a74")
