@@ -22,12 +22,17 @@ strong {
     font-style: normal;
 }
 
-pre.listing {
+.md p {
+    padding-top: 0.25em;
+}
+
+.md pre.listing {
     padding: 0.5em;
     margin-left: 2em;
     font-family: "Fira Mono", monospace;
     background: transparent;
     page-break-inside: avoid;
+    overflow-x: hidden;
 }
 
 .md ul {
@@ -43,6 +48,7 @@ pre.listing {
 
 .md li {
     margin: 0.25em 0;
+    padding-top: 0.4em;
 }
 
 .md li::before {
@@ -168,7 +174,7 @@ pre.listing {
     text-transform: uppercase;    
     padding-top: 1em;
     color: black;
-    border-top: 1px solid rgb(35, 38, 43);
+    border-top: 0px solid rgb(35, 38, 43);
 }
 
 .md h1 {
@@ -181,7 +187,7 @@ h2::after {
     content: "";
     display: block;    
     width: 100%; /* Makes the horizontal rule extend to the right */
-    border-top: 0.5px solid rgb(223, 223, 223); /* Sets the color and thickness of the horizontal rule */
+    border-top: 0px solid rgb(223, 223, 223); /* Sets the color and thickness of the horizontal rule */
     margin-top: 10px; /* Adds space between the heading and the horizontal rule */
   }
 
@@ -223,7 +229,7 @@ hr {
 
 .md td, .md th 
 {
-    font-size: 12px;
+    font-size: 10px;
 }
 
 .md span.fancy-quote
@@ -254,11 +260,11 @@ hr {
 
 @media print {
     body {
-        margin-right: 6em;
-        margin-left: calc(6em + 5%);
+        margin-right: 8em;
+        margin-left: calc(8em + 5%);
         overflow: auto;
-        max-width: 55em;        
-        font-size: 10pt;
+        max-width: 40em;        
+        font-size: 8pt;
         line-height: 110%;
     }
 
@@ -268,7 +274,7 @@ hr {
     .md h4,
     .md h5,
     .md h6 {
-        font-size: 10pt;
+        font-size: 8pt;
         line-height: 110%;
        
     }
