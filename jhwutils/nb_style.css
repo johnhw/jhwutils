@@ -1,11 +1,12 @@
 @import url('https://fonts.googleapis.com/css?family=Fira+Mono&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Merriweather&display=swap');
 @import url('https://fonts.googleapis.com/css?family=EB+Garamond&display=swap');
 
 body {
     color: #2C3E4A; /* Dark text color on a light background */
     background: white; /* White background */
-    font-family: "Fira Mono", monospace; 
+    font-family: "Merriweather", sans-serif; 
     font-size: 12px; /* Specify the font size */
     text-justify: newspaper;
     margin: 1em; /* Add margin for better readability */
@@ -24,6 +25,9 @@ strong {
 
 .md p {
     padding-top: 0.25em;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    margin-top: 0px; 
 }
 
 .md pre.listing {
@@ -48,7 +52,7 @@ strong {
 
 .md li {
     margin: 0.25em 0;
-    padding-top: 0.4em;
+    padding-top: 0.2em;
 }
 
 .md li::before {
@@ -86,6 +90,7 @@ strong {
     max-width: 4em;
     display: inline-block;
     margin-left: -1.3em;    
+    padding-top:0em;
     
 }
 
@@ -97,6 +102,7 @@ strong {
     max-width: 4em;
     display: inline-block;
     margin-left: -1.3em;
+    padding-top:0em;
     content: "";
     
 }
@@ -144,8 +150,8 @@ strong {
     margin-left: calc(-2em - 5%);
     line-height: 100%;    
     margin-top: 0em;
-    margin-bottom: 0.5em;
-    padding-top: 0.5em;
+    margin-bottom: 0.0em;
+    padding-top: 1.5em;
     padding-bottom: 0.5em;
 
 }
@@ -263,8 +269,8 @@ hr {
         margin-right: 8em;
         margin-left: calc(8em + 5%);
         overflow: auto;
-        max-width: 40em;        
-        font-size: 8pt;
+        max-width: 50em;        
+        font-size: 10pt;
         line-height: 110%;
     }
 
@@ -274,7 +280,7 @@ hr {
     .md h4,
     .md h5,
     .md h6 {
-        font-size: 8pt;
+        font-size: 10pt;
         line-height: 110%;
        
     }
