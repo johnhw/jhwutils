@@ -37,7 +37,65 @@ def fill_shape(shape):
     n = np.arange(np.prod(shape)).reshape(shape)    
     return n
 
+import matplotlib.pyplot as plt
 
+def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=()):
+    shape = x.shape
+    
+    # Ensure at least 2D
+    if len(shape) == 1:
+        x = x[None, :]
+
+    rows, cols = x.shape[0:2]
+
+    # Generate gradient color for depth
+    depth_color = f"rgb({240 - index * 10}, {240 - index * 10}, {240 - index * 10})"
+    
+
+    mat = []
+    for row in range(rows):
+        line = []
+        for col in range(cols):
+            # Extend the parent index tuple with the current row and column to track indices
+            current_indices = parent_indices + (row, col)
+
+            if len(x.shape) == 2:
+                # Fixed-width span with center alignment, solid black text, and tooltip for actual NumPy indices
+                line.append(f"""
+                <span style='display: inline-block; width: 40px; text-align: center; font-family: monospace; 
+                             margin: 5px; color: black;' title='{current_indices}'>
+                    {x[row, col]}
+                </span>
+                """)
+            else:
+                # Recursively generate nested tensor groups with updated indices
+                line.append(f"{make_boxed_tensor_html(x[row, col], box_rows=box_rows, index=index+2, parent_indices=current_indices)}")
+
+        # Apply hover effects to the entire group (row or matrix)
+        if box_rows:
+            mat.append(f"""
+            <div style='border: 1px solid #888888; padding: 5px; display: inline-block; 
+                        background-color: {depth_color}; border-radius: 8px;
+                        transition: background-color 0.3s, box-shadow 0.3s; color: black;'
+                 onmouseover='this.style.backgroundColor="#f0f0f0"; this.style.boxShadow="2px 2px 10px #aaaaaa";'
+                 onmouseout='this.style.backgroundColor="{depth_color}"; this.style.boxShadow="none";'>
+                {' '.join(line)}
+            </div>
+            """)
+        else:
+            mat.append(" ".join(line))
+
+    # Join rows with <br/> for line breaks
+    mat_code = "<br/>\n".join(mat)
+    
+    # Removed the outermost border and kept layout responsive
+    return f"<div style='padding: 5px; margin: 5px; max-width: 100%; word-wrap: break-word;'> {mat_code} </div>"
+
+
+def show_boxed_tensor_html(x, box_rows=True):
+    # Display the boxed tensor in HTML format in the notebook
+    from IPython.display import display, HTML
+    display(HTML(make_boxed_tensor_html(x, box_rows=box_rows)))
     
     
 def boxed_tensor_ascii(x, j='\n'):    
@@ -119,8 +177,8 @@ def make_boxed_tensor_latex(x, box_rows=True, index=0):
     ixs = "ijklmnopqrst"
     shape = x.shape
     # ensure has at least 2D
-    if len(shape)==1:
-        x = x[None,:]
+    if len(shape) == 1:
+        x = x[None, :]
         
     rows, cols = x.shape[0:2]
     
@@ -130,23 +188,26 @@ def make_boxed_tensor_latex(x, box_rows=True, index=0):
     for row in range(rows):
         line = []
         for col in range(cols):
-            if len(x.shape)==2:
-                line.append("\\quad \  \\llap{%d} \ \  \strut " % (x[row,col]))
+            if len(x.shape) == 2:
+                # Corrected string with proper LaTeX escaping
+                line.append(r"\quad \llap{%d} \strut" % (x[row, col]))
             else:
                 # insert a recursive matrix box
-                line.append("%s" % (make_boxed_tensor_latex(x[row,col], box_rows=box_rows, index=index+2)))
+                line.append("%s" % (make_boxed_tensor_latex(x[row, col], box_rows=box_rows, index=index+2)))
         # either box the whole row or just box entire matrices
         if box_rows:
-            mat.append("\\fbox { $ "  + " ".join(line) + " \strut $ } ")
+            mat.append(r"\fbox { $ "  + " ".join(line) + r" \strut $ } ")
         else:
             mat.append(" ".join(line))
-    mat_code = "\\\\ \n".join(mat)
-    return "  \\fbox{  $ \n "+ mat_code+"  \strut $ }\ \ "
+    mat_code = r"\\ \n".join(mat)
+    return r"  \fbox{  $ \n " + mat_code + r"  \strut $ }\ \ "
 
 
 def show_boxed_tensor_latex(x, box_rows=True):    
     # show the matrix in the notebook as a LaTeX equation
-    IPython.display.display(IPython.display.Latex("\\[ " + make_boxed_tensor_latex(x, box_rows=box_rows) + " \\]"))
+    import IPython.display
+    IPython.display.display(IPython.display.Latex(r"\[ " + make_boxed_tensor_latex(x, box_rows=box_rows) + r" \]"))
+
 
 
 def show_matrix_effect(m, suptitle=""):
