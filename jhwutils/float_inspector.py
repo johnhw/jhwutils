@@ -83,14 +83,13 @@ def print_binary_float(fl, word, exp, mantissa):
         print("")
 
 
-def print_binary_float_html(fl, word, exp, mantissa):
-        
+def print_binary_float_html(fl, word, exp, mantissa):        
         mantissa -= 1
         bias = (2**(exp-1))-1
         total_width = exp + mantissa + 1 # for sign
-        
+      
         sep_word = intersperse(word, [1,exp,mantissa], ['</td> <td>','</td> <td>','</td> <td>'])
-        bar_word = intersperse(word, [1,exp,mantissa], ['|','|','|'])[:-1]
+        bar_word = intersperse(word, [1,exp,mantissa], [' | ',' | ',' | '])[:-1]
         sign, e, m = int(word[0:1],2), int(word[1:1+exp],2)-bias, int(word[1+exp:total_width],2)        
         infinite = e==2**(exp-1)
             
@@ -295,3 +294,65 @@ def print_shape_html(x):
 
     html += "</table>"
     display(HTML(html))
+
+def show_grouping(x):
+    """
+    Prints out a multi-dimensional array with parentheses to show the grouping of elements
+    """
+    shape = x.shape
+    flat = x.ravel()  # Raveled (1D) version of the array
+    num_elements = flat.size
+    current_multi_index = [0] * len(shape)  # Keep track of the current multi-dimensional index
+    previous_multi_index = [0] * len(shape)  # Track the previous index to know when to close/open parentheses
+    
+
+    elements = []  # List to hold the HTML output
+    parens = []
+
+    for _ in range(len(shape)):
+        parens.append("(")
+
+    
+    elements.extend(parens)
+
+
+    # Iterate over each element in the raveled array
+    for i in range(num_elements):
+        # Get the current multi-dimensional index for the raveled index
+        current_multi_index = np.unravel_index(i, shape)
+        parens = []
+        # Close parentheses if finishing a group in a higher dimension
+        for dim in reversed(range(len(shape))):
+            if current_multi_index[dim] != previous_multi_index[dim]:
+                if len(shape)-dim>1:
+                    elements[-1] = elements[-1].strip()  # Remove trailing whitespace
+                for _ in range(dim+1, len(shape)):
+                    parens.append(")")
+                for _ in range(dim+1, len(shape)):
+                    parens.append(" ")
+            
+                
+        # Open parentheses for new group
+        for dim in range(len(shape)):
+            if current_multi_index[dim] != previous_multi_index[dim]:
+                for _ in range(dim+1, len(shape)):
+                    parens.append("(")
+                
+                    
+                break
+            
+        
+        elements.extend(parens)
+
+        # Add the current element as part of the fixed-width display
+        elements.append(f'{flat[i]} ')
+
+        # Update the previous multi-dimensional index
+        previous_multi_index = list(current_multi_index)
+
+    # Close any remaining open parentheses
+    for _ in range(len(shape)):
+        elements[-1] = elements[-1].strip()
+        elements.append(")")
+    
+    return ''.join(elements)

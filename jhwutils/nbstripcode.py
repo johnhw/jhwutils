@@ -34,6 +34,50 @@ except ImportError:
             return current.write(nb, f, "json")
 
 
+def convert_indented_to_fenced_blocks(markdown: str) -> str:
+    lines = markdown.splitlines(keepends=True)
+    output = []
+    in_fenced_block = False
+    indent_threshold = None
+
+    for i, line in enumerate(lines):
+        stripped_line = line.lstrip()
+        current_indent = len(line) - len(stripped_line)
+
+        if stripped_line == '':
+            # Keep empty lines as is
+            output.append(line)
+            continue
+
+        if not in_fenced_block:
+            # Check if we are starting an indented block
+            if current_indent > 0:
+                # Find the previous line that has less indentation
+                if i > 0 and len(lines[i - 1].lstrip()) > 0 and (len(lines[i - 1]) - len(lines[i - 1].lstrip())) < current_indent:
+                    in_fenced_block = True
+                    indent_threshold = current_indent
+                    output.append("```\n")
+                    output.append(line[current_indent:])  # Dedent the line
+                else:
+                    output.append(line)
+            else:
+                output.append(line)
+        else:
+            # We are inside a fenced block
+            if current_indent >= indent_threshold:
+                output.append(line[current_indent:])  # Dedent the line
+            else:
+                # End of fenced block
+                output.append("```\n")
+                in_fenced_block = False
+                indent_threshold = None
+                output.append(line)
+
+    if in_fenced_block:
+        output.append("```\n")  # Close block if file ends in an indented block
+
+    return ''.join(output)
+
 # Find <img> tags and ![]() entries strip them out
 def strip_image(source):
     """Remove any image or audio tags (either MD or HTML style) from a string"""
@@ -150,8 +194,10 @@ def strip_code_nb(
     nb.metadata.pop("signature", None)
     cells = []
     for ix, cell in enumerate(_cells(nb)):
-        # markdown cell
+        # markdown cellco
         if cell.cell_type == "markdown":
+            # fix indented code blocks to make sure they are fenced
+            # cell.source = convert_indented_to_fenced_blocks(cell.source) # disabled for now
             if strip_images:
                 cell.source = strip_image(cell.source)
             else:
@@ -164,13 +210,14 @@ def strip_code_nb(
                             cell.source = cell.source.replace(
                                 f"attachment:{fname}", str(out_name)
                             )
+            cell.source = clean_html(cell.source)
             cells.append(cell)
         # code cell
         if cell.cell_type == "code":            
             if not strip_code:                       
                 if strip_outputs:
                     cell = strip_output_from_cell(cell)
-                
+                cell.source = clean_html(cell.source)
 
                 if not strip_outputs:
                     # check for attached images in the data output     
@@ -179,7 +226,13 @@ def strip_code_nb(
                         outs = cell["outputs"]
                         cell["outputs"] = []
                         for j,output in enumerate(outs):
+                            
                             if "data" in output:                                                                
+                                if "text/plain" in output["data"] and "HTML" in output["data"]["text/plain"]:
+                                    html = output["data"]["text/html"] 
+                                    html = html.replace("\n","")
+                                    output["data"]["text/html"]  = html
+                                    cell["outputs"].append(output)
                                 images = extract_data(output["data"], ix, j, nb_path)                                
                                 if len(images)==0:
                                     cell["outputs"].append(output)
@@ -191,6 +244,7 @@ def strip_code_nb(
                                     for out_name in images:
                                         img_cell.source += f"![]({out_name})\n\n"
                                     cells.append(img_cell)
+                
                 cells.append(cell)                
 
             # check for "retain_img(...)" in this cell

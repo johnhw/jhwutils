@@ -1,6 +1,6 @@
 try:
     import sympy
-    sympy.init_printing(use_latex='png')
+    sympy.init_printing(use_latex='mathjax')
 except: 
     sympy = False
 
@@ -21,7 +21,9 @@ def print_matrix(name, matrix, prec=2):
         matrix = matrix[None,:]
         
     if sympy:    
+        sympy.init_printing(use_latex='mathjax')
         IPython.display.display(IPython.display.Latex("${0} = {1}$".format(name, sympy.latex(sympy.Matrix(matrix)))))
+        sympy.init_printing(use_latex=False)
     else:
         print(name, "\n", matrix)
 
@@ -41,7 +43,7 @@ import matplotlib.pyplot as plt
 
 def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=()):
     shape = x.shape
-    
+
     # Ensure at least 2D
     if len(shape) == 1:
         x = x[None, :]
@@ -50,7 +52,6 @@ def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=()):
 
     # Generate gradient color for depth
     depth_color = f"rgb({240 - index * 10}, {240 - index * 10}, {240 - index * 10})"
-    
 
     mat = []
     for row in range(rows):
@@ -82,14 +83,19 @@ def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=()):
                 {' '.join(line)}
             </div>
             """)
-        else:
-            mat.append(" ".join(line))
 
+    # Wrap the vertically stacked groups with an additional border
+    group_style = f"""
+        border: 2px solid #555555; margin: 10px; padding: 10px; 
+        display: inline-block; border-radius: 10px; background-color: {depth_color};
+    """
+    
     # Join rows with <br/> for line breaks
     mat_code = "<br/>\n".join(mat)
     
-    # Removed the outermost border and kept layout responsive
-    return f"<div style='padding: 5px; margin: 5px; max-width: 100%; word-wrap: break-word;'> {mat_code} </div>"
+    # Add an extra div around the vertically stacked groups
+    return f"<div style='{group_style}'> {mat_code} </div>"
+
 
 
 def show_boxed_tensor_html(x, box_rows=True):
