@@ -9,4 +9,6 @@ setup(name='jhwutils',
       author_email='johnhw@gmail.com',
       url='https://github.com/johnhw/jhwutils',
       packages=['jhwutils'],
+      include_package_data=True,
+      package_data={"jhwutils": ["*.css"]},
      )
