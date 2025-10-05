@@ -170,8 +170,10 @@ def prestige_mark():
             IPython.display.HTML(
                 f"""
         <div class="alert alert-box alert-success" style="background-color: #ddaa88">
-        <h1> <!--{id:"PRESTIGEMARK", marks:"%d"}--> 
-         ☺ Prestige mark achieved!
+        <h1>
+        <br>
+         🏆 Prestige mark achieved!
+         <br>
          </h1> </div>"""
             )
         )
@@ -181,7 +183,7 @@ def prestige_mark():
                 f""""""             
             )
         )
-        raise e
+        
 
 @contextmanager
 def tick():
