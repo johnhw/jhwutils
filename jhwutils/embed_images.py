@@ -43,7 +43,7 @@ def to_data_uri(data: bytes, mime: str | None) -> str:
 
 def inline_images(html: str, base_dir: Path) -> str:
     soup = bs4.BeautifulSoup(html, "html.parser")
-
+    print(f"Base dir: {base_dir}")
     # If <base href="..."> is present, respect it
     base_tag = soup.find("base", href=True)
     base_href = base_tag["href"].strip() if base_tag else None
@@ -52,10 +52,12 @@ def inline_images(html: str, base_dir: Path) -> str:
         if base_href:
             return urljoin(base_href, u)
         return u
-
+    
     for img in soup.find_all("img"):
+        print(f"Processing <img>: {img}")
         src = (img.get("src") or "").strip()
-        if not src or src.startswith("data:"):
+        if not src or src.startswith("data:"):            
+            print("  Skipping (no src or already data URI)")
             continue
         resolved = resolve(src)
         try:

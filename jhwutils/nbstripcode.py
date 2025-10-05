@@ -95,6 +95,39 @@ def strip_image(source):
     return source
 
 
+# convert HTML style <img> tags to markdown image tags
+# like <img src="path/to/image.png" alt="Alt text">
+# to ![Alt text](path/to/image.png)
+# include any attributes like width and height as ![Alt text](path/to/image.png width=50%)
+def convert_img_tags(source):
+    """Convert HTML <img> tags to markdown ![]() style"""
+    img_tag_pattern = r'<img\s+([^>]*?)>'
+    
+    def replace_img_tag(match):
+        attrs = match.group(1)
+        src_match = re.search(r'src=["\']([^"\']+)["\']', attrs)
+        alt_match = re.search(r'alt=["\']([^"\']*)["\']', attrs)
+        width_match = re.search(r'width=["\']([^"\']+)["\']', attrs)
+        height_match = re.search(r'height=["\']([^"\']+)["\']', attrs)
+
+        if not src_match:
+            return match.group(0)  # No src attribute, return original tag
+
+        src = src_match.group(1)
+        alt = alt_match.group(1) if alt_match else ''
+        width = width_match.group(1) if width_match else None
+        height = height_match.group(1) if height_match else None
+
+        size_str = ''
+        if width:
+            size_str += f' width={width}'
+        if height:
+            size_str += f' height={height}'
+
+        return f'![{alt}]({src}{size_str})'
+
+    return re.sub(img_tag_pattern, replace_img_tag, source)
+
 def clean_html(source):
     """Replace < and > with &lt; and &gt;"""
     source = re.sub(r"<", "&lt;", source)
@@ -162,6 +195,8 @@ def extract_attachments(attachments, ix, nb_path):
     return output_names
 
 
+
+
 def extract_data(data, ix, j, nb_path):
     """Extract inline data from a cell.
     Each data item is a dictionary with a mimetype and a base64-encoded
@@ -189,11 +224,19 @@ def strip_code_nb(
     strip_outputs=True,
     retain_imgs=True,
     retain_attachments=True,
+    remove_tags=[],
 ):
     """strip the outputs from a notebook object"""
     nb.metadata.pop("signature", None)
     cells = []
     for ix, cell in enumerate(_cells(nb)):
+
+        # check the tags; if any are in the remove list, skip this cell
+        if "tags" in cell.metadata:
+            for tag in cell.metadata["tags"]:
+                if tag in remove_tags:
+                    click.echo(f"Removing cell {ix} due to {tag } tag.")
+                    continue
         # markdown cellco
         if cell.cell_type == "markdown":
             # fix indented code blocks to make sure they are fenced
@@ -210,6 +253,8 @@ def strip_code_nb(
                             cell.source = cell.source.replace(
                                 f"attachment:{fname}", str(out_name)
                             )
+            # convert any HTML <img> tags to markdown ![]() style
+            cell.source = convert_img_tags(cell.source)                            
             cell.source = clean_html(cell.source)
             cells.append(cell)
         # code cell
@@ -312,6 +357,12 @@ def strip_code_nb(
     help="Output file",
     default=None,
 )
+@click.option(
+    "--remove-tags",
+    multiple=True,
+    help="Remove cells with any of these tags",
+    default=[],
+)
 def convert(
     notebook_path,
     strip_images,
@@ -324,6 +375,7 @@ def convert(
     link_css,
     link_markdeep,
     output,
+    remove_tags,
 ):
     """
     Convert a Jupyter notebook to a different format with specified options.
@@ -339,6 +391,7 @@ def convert(
         strip_outputs=strip_output,
         retain_attachments=retain_attachments,
         retain_imgs=retain_imgs,
+        remove_tags=remove_tags,
     )
     export_markdown(
         nb,
