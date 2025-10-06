@@ -19,7 +19,15 @@ def retain_img(fname):
     os.makedirs("generated", exist_ok=True)
     plt.savefig("generated/" + fname, bbox_inches="tight", pad_inches=0, dpi=200)
 
-
+def save_gif(a, fname, duration=10):
+    a = np.uint8(np.clip(a, 0, 1) * 255.0)
+    frames = []
+    for frame in range(a.shape[0]):
+        img = PIL.Image.fromarray(a[frame, ...])
+        frames.append(img)
+    img.save(
+        fname, format="gif", save_all=True, append_images=frames, loop=0, duration=duration
+    )
 
 def show_gif(a, width="100%", duration=10):
     a = np.uint8(np.clip(a, 0, 1) * 255.0)
