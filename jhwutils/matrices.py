@@ -41,7 +41,7 @@ def fill_shape(shape):
 
 import matplotlib.pyplot as plt
 
-def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=()):
+def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=(), format='%2f'):
     shape = x.shape
 
     # Ensure at least 2D
@@ -62,10 +62,11 @@ def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=()):
 
             if len(x.shape) == 2:
                 # Fixed-width span with center alignment, solid black text, and tooltip for actual NumPy indices
+                formatted = format % x[row, col]
                 line.append(f"""
                 <span style='display: inline-block; width: 40px; text-align: center; font-family: monospace; 
                              margin: 5px; color: black;' title='{current_indices}'>
-                    {x[row, col]}
+                    {formatted}
                 </span>
                 """)
             else:

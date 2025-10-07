@@ -7,7 +7,7 @@ from IPython.display import HTML, display
 def bitstring_array(x):
     # force to big endian for printing
     endianed = x.dtype.newbyteorder('B')    
-    return "".join('{0:08b}'.format(d) for d in x.astype(endianed).tostring())
+    return "".join('{0:08b}'.format(d) for d in x.astype(endianed).tobytes())
 
 
 import itertools    
