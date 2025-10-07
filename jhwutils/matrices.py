@@ -41,7 +41,7 @@ def fill_shape(shape):
 
 import matplotlib.pyplot as plt
 
-def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=(), format='%2f'):
+def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=(), format='%.1f'):
     shape = x.shape
 
     # Ensure at least 2D
