@@ -41,12 +41,18 @@ def fill_shape(shape):
 
 import matplotlib.pyplot as plt
 
-def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=(), format='%.1f'):
+def make_boxed_tensor_html(x, box_rows=True, index=0, parent_indices=(), format=None):
     shape = x.shape
 
     # Ensure at least 2D
     if len(shape) == 1:
         x = x[None, :]
+
+    if format is None:
+        if np.issubdtype(x.dtype, np.integer):
+            format = "%d"
+        else:
+            format = "%.1f"
 
     rows, cols = x.shape[0:2]
 
